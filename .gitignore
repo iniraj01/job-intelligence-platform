@@ -1,3 +1,6 @@
 node_modules/
 target/
 .env
+uploads/
+apache-maven*/
+*.zip

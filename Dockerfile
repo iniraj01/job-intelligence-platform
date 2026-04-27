@@ -8,8 +8,12 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Run stage (Uses a lightweight Java 21 image to run the JAR)
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
+
+# Install Python3 for job fetching script
+RUN apt-get update && apt-get install -y python3 python3-pip && rm -rf /var/lib/apt/lists/*
+
 # Copy the built JAR from the previous stage
 COPY --from=build /app/target/*.jar app.jar
 
