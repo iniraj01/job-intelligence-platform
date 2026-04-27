@@ -32,13 +32,31 @@ def extract_text_from_pdf(pdf_path):
         sys.exit(1)
 
 def extract_experience(text):
-    # Match patterns like "3 years of experience", "5+ years", "2 yrs"
-    pattern = r'(\d+)\+?\s*(?:years?|yrs?)(?:\s*of)?\s*experience'
-    matches = re.findall(pattern, text, re.IGNORECASE)
-    if matches:
-        # Return the maximum found year as an integer
-        years = [int(m) for m in matches]
-        return max(years)
+    # Match patterns like "3 years of experience", "5+ years", "2 yrs", "Experience: 3 years"
+    patterns = [
+        r'(\d+)\+?\s*(?:years?|yrs?)(?:\s*of)?\s*experience', # 3 years of experience
+        r'experience(?:.*?)(\d+)\+?\s*(?:years?|yrs?)',        # Experience: 3 years
+        r'(\d+)\+?\s*(?:years?|yrs?)'                          # fallback: 3 years (if near experience, but let's just match any "X years")
+    ]
+    
+    # First try strict patterns
+    for pattern in patterns[:2]:
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        if matches:
+            years = [int(m) for m in matches]
+            return max(years)
+            
+    # If not found, try finding the word "experience" and looking for years nearby
+    text_lower = text.lower()
+    if "experience" in text_lower:
+        # Just find any digit followed by years
+        matches = re.findall(r'(\d+)\+?\s*(?:years?|yrs?)', text_lower)
+        if matches:
+            # Filter out ridiculously high numbers (like 2020 years)
+            years = [int(m) for m in matches if int(m) < 40]
+            if years:
+                return max(years)
+                
     return 0
 
 def extract_information(text):
