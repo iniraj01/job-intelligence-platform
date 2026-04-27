@@ -11,8 +11,10 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
-# Install Python3 for job fetching script
+# Install Python3 and dependencies for job fetching and resume parsing scripts
 RUN apt-get update && apt-get install -y python3 python3-pip && rm -rf /var/lib/apt/lists/*
+RUN pip3 install --break-system-packages requests PyPDF2 spacy
+RUN python3 -m spacy download en_core_web_sm --break-system-packages
 
 # Copy the built JAR from the previous stage
 COPY --from=build /app/target/*.jar app.jar
