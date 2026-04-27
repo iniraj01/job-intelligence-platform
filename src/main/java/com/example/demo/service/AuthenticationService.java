@@ -76,7 +76,7 @@ public class AuthenticationService {
         userRepository.save(user);
 
         // Generate and send OTP
-        if (otpService.generateAndSendOtp(request.getEmail(), request.getPassword())) {
+        if (otpService.generateAndSendOtp(request.getEmail(), request.getPassword(), request.getName())) {
             return new AuthResponse(true,
                     "User registered successfully. Please verify your email with OTP sent to " + request.getEmail());
         } else {

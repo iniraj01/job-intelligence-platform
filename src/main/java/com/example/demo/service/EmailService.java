@@ -12,7 +12,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendOtpEmail(String toEmail, String otp, String password) {
+    public void sendOtpEmail(String toEmail, String otp, String password, String name) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -27,7 +27,7 @@ public class EmailService {
                     + "<p style=\"color: #6b7280; font-size: 16px; margin-top: 5px;\">Secure Account Verification</p>"
                     + "</div>"
                     + "<div style=\"background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);\">"
-                    + "<h2 style=\"color: #111827; margin-top: 0;\">Hello!</h2>"
+                    + "<h2 style=\"color: #111827; margin-top: 0;\">Hello " + (name != null ? name : "") + "!</h2>"
                     + "<p style=\"color: #4b5563; font-size: 16px; line-height: 1.5;\">Thank you for registering with Stackseed Job Intelligence. To complete your signup process, please use the verification code below:</p>"
                     + "<div style=\"text-align: center; margin: 30px 0;\">"
                     + "<span style=\"display: inline-block; background-color: #f3f4f6; color: #3b82f6; font-size: 32px; font-weight: bold; letter-spacing: 5px; padding: 15px 30px; border-radius: 8px; border: 2px dashed #93c5fd;\">"

@@ -62,12 +62,13 @@ public class AuthController {
                     .body(new AuthResponse(false, "Email is required"));
         }
 
-        if (!authenticationService.getUserByEmail(email).isPresent()) {
+        java.util.Optional<com.example.demo.model.User> userOpt = authenticationService.getUserByEmail(email);
+        if (!userOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new AuthResponse(false, "User not found"));
         }
 
-        if (otpService.generateAndSendOtp(email)) {
+        if (otpService.generateAndSendOtp(email, null, userOpt.get().getName())) {
             return ResponseEntity.ok(new AuthResponse(true, "OTP sent successfully to " + email));
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

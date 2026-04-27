@@ -29,7 +29,7 @@ public class OtpService {
     /**
      * Generate and send OTP to email
      */
-    public boolean generateAndSendOtp(String email, String password) {
+    public boolean generateAndSendOtp(String email, String password, String name) {
         try {
             // Generate 6-digit OTP
             String otp = String.format("%06d", random.nextInt(1000000));
@@ -45,7 +45,7 @@ public class OtpService {
             otpDataRepository.save(otpData);
 
             // Send email
-            emailService.sendOtpEmail(email, otp, password);
+            emailService.sendOtpEmail(email, otp, password, name);
 
             return true;
         } catch (Exception e) {
