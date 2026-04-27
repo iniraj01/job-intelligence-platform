@@ -783,23 +783,37 @@
                 password: document.getElementById('loginPassword').value,
                 captchaToken: captchaResponse
             };
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (res.ok && data.success) {
-                localStorage.setItem('jobPlatformUser', JSON.stringify({userId: data.user.id, name: data.user.name, token: data.token}));
-                checkSession();
-                closeModal('loginModal');
-                document.getElementById('loginForm').reset();
-                grecaptcha.reset(loginCaptchaId);
-                showMessage('✅ Login successful!', 'success');
-            } else {
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                
+                let data;
+                try {
+                    data = await res.json();
+                } catch (jsonError) {
+                    document.getElementById('loginMsg').className = 'message error';
+                    document.getElementById('loginMsg').textContent = 'Server returned invalid response (500/502). Check backend logs.';
+                    return;
+                }
+
+                if (res.ok && data.success) {
+                    localStorage.setItem('jobPlatformUser', JSON.stringify({userId: data.user.id, name: data.user.name, token: data.token}));
+                    checkSession();
+                    closeModal('loginModal');
+                    document.getElementById('loginForm').reset();
+                    grecaptcha.reset(loginCaptchaId);
+                    showMessage('✅ Login successful!', 'success');
+                } else {
+                    document.getElementById('loginMsg').className = 'message error';
+                    document.getElementById('loginMsg').textContent = data.message || 'Login failed';
+                    grecaptcha.reset(loginCaptchaId);
+                }
+            } catch (err) {
                 document.getElementById('loginMsg').className = 'message error';
-                document.getElementById('loginMsg').textContent = data.message || 'Login failed';
-                grecaptcha.reset(loginCaptchaId);
+                document.getElementById('loginMsg').textContent = 'Network Error: ' + err.message;
             }
         });
 
