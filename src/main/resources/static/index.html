@@ -725,7 +725,7 @@
                 password: document.getElementById('signupPassword').value,
                 captchaToken: captchaResponse
             };
-            const res = await fetch('http://localhost:8080/api/auth/signup', {
+            const res = await fetch('/api/auth/signup', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
@@ -750,7 +750,7 @@
                 email: document.getElementById('otpEmail').value,
                 otp: document.getElementById('otpInput').value
             };
-            const res = await fetch('http://localhost:8080/api/auth/verify-otp', {
+            const res = await fetch('/api/auth/verify-otp', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
@@ -783,7 +783,7 @@
                 password: document.getElementById('loginPassword').value,
                 captchaToken: captchaResponse
             };
-            const res = await fetch('http://localhost:8080/api/auth/login', {
+            const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
@@ -813,7 +813,7 @@
 
             // Track in DB
             try {
-                await fetch('http://localhost:8080/applyJob', {
+                await fetch('/applyJob', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -839,7 +839,7 @@
             list.innerHTML = '<p style="text-align:center;">Loading...</p>';
             
             try {
-                const res = await fetch(`http://localhost:8080/myApplications?userId=${currentUser.userId}`);
+                const res = await fetch(`/myApplications?userId=${currentUser.userId}`);
                 const data = await res.json();
                 
                 if (data.length === 0) {
@@ -1004,7 +1004,7 @@
             lastUpdated.textContent = `Last updated: ${now.toLocaleTimeString()}`;
 
             try {
-                const response = await fetch('http://localhost:8080/jobs/match', {
+                const response = await fetch('/jobs/match', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
