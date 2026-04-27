@@ -88,48 +88,48 @@ public class AuthenticationService {
      * Login user with CAPTCHA
      */
     public AuthResponse loginUser(LoginRequest request) {
-        // Validate input
-        if (request.getEmail() == null || request.getEmail().isEmpty()) {
-            return new AuthResponse(false, "Email is required");
-        }
-
-        if (request.getPassword() == null || request.getPassword().isEmpty()) {
-            return new AuthResponse(false, "Password is required");
-        }
-
-        if (request.getCaptchaToken() == null || request.getCaptchaToken().isEmpty()) {
-            return new AuthResponse(false, "CAPTCHA validation required");
-        }
-
-        // Verify CAPTCHA
-        if (!captchaService.verify(request.getCaptchaToken())) {
-            return new AuthResponse(false, "CAPTCHA verification failed");
-        }
-
-        // Find user by email
-        Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
-        if (!userOptional.isPresent()) {
-            return new AuthResponse(false, "Invalid email or password");
-        }
-
-        User user = userOptional.get();
-
-        // Check if account is enabled
-        if (!user.isAccountEnabled()) {
-            return new AuthResponse(false, "Account is disabled");
-        }
-
-        // Verify password
-        if (!verifyPassword(request.getPassword(), user.getPassword())) {
-            return new AuthResponse(false, "Invalid email or password");
-        }
-
-        // Check if email is verified
-        if (!user.isEmailVerified()) {
-            return new AuthResponse(false, "Please verify your email first");
-        }
-
         try {
+            // Validate input
+            if (request.getEmail() == null || request.getEmail().isEmpty()) {
+                return new AuthResponse(false, "Email is required");
+            }
+
+            if (request.getPassword() == null || request.getPassword().isEmpty()) {
+                return new AuthResponse(false, "Password is required");
+            }
+
+            if (request.getCaptchaToken() == null || request.getCaptchaToken().isEmpty()) {
+                return new AuthResponse(false, "CAPTCHA validation required");
+            }
+
+            // Verify CAPTCHA
+            if (!captchaService.verify(request.getCaptchaToken())) {
+                return new AuthResponse(false, "CAPTCHA verification failed");
+            }
+
+            // Find user by email
+            java.util.Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
+            if (!userOptional.isPresent()) {
+                return new AuthResponse(false, "Invalid email or password");
+            }
+
+            User user = userOptional.get();
+
+            // Check if account is enabled
+            if (!user.isAccountEnabled()) {
+                return new AuthResponse(false, "Account is disabled");
+            }
+
+            // Verify password
+            if (!verifyPassword(request.getPassword(), user.getPassword())) {
+                return new AuthResponse(false, "Invalid email or password");
+            }
+
+            // Check if email is verified
+            if (!user.isEmailVerified()) {
+                return new AuthResponse(false, "Please verify your email first");
+            }
+
             // Generate JWT token
             String token = jwtTokenService.generateToken(user.getEmail());
             UserResponse userResponse = new UserResponse(user);
@@ -137,7 +137,7 @@ public class AuthenticationService {
             return new AuthResponse(true, "Login successful", token, userResponse);
         } catch (Exception e) {
             e.printStackTrace();
-            return new AuthResponse(false, "Login failed due to server error: " + e.getMessage());
+            return new AuthResponse(false, "SERVER ERROR DETAIL: " + e.getMessage() + " | Class: " + e.getClass().getSimpleName());
         }
     }
 
