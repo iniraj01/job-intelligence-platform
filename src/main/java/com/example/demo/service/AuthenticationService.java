@@ -129,11 +129,16 @@ public class AuthenticationService {
             return new AuthResponse(false, "Please verify your email first");
         }
 
-        // Generate JWT token
-        String token = jwtTokenService.generateToken(user.getEmail());
-        UserResponse userResponse = new UserResponse(user);
+        try {
+            // Generate JWT token
+            String token = jwtTokenService.generateToken(user.getEmail());
+            UserResponse userResponse = new UserResponse(user);
 
-        return new AuthResponse(true, "Login successful", token, userResponse);
+            return new AuthResponse(true, "Login successful", token, userResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new AuthResponse(false, "Login failed due to server error: " + e.getMessage());
+        }
     }
 
     /**
