@@ -409,6 +409,34 @@
         .footer-bottom-links a:hover {
             color: #e2e8f0;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .auth-container {
+                position: relative;
+                justify-content: center;
+                margin-top: 15px;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            .job-header {
+                flex-direction: column;
+            }
+            .match-badge {
+                margin-top: 10px;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 20% auto;
+            }
+            .main-content {
+                padding: 10px;
+            }
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -898,8 +926,10 @@
         const filterInput = document.getElementById('filterInput');
         const sortSelect = document.getElementById('sortSelect');
         const lastUpdated = document.getElementById('lastUpdated');
-
+        
         let currentJobs = [];
+        let currentPage = 1;
+        const jobsPerPage = 5;
 
         fileInput.addEventListener('change', function() {
             if (this.files && this.files.length > 0) {
@@ -1047,6 +1077,7 @@
         sortSelect.addEventListener('change', applyFiltersAndSort);
 
         function applyFiltersAndSort() {
+            currentPage = 1; // Reset to page 1 on filter
             let filteredJobs = [...currentJobs];
             
             // Filter
@@ -1081,7 +1112,12 @@
 
             jobsListContainer.innerHTML = '';
             
-            jobs.forEach(job => {
+            const totalPages = Math.ceil(jobs.length / jobsPerPage);
+            const startIndex = (currentPage - 1) * jobsPerPage;
+            const endIndex = startIndex + jobsPerPage;
+            const jobsToShow = jobs.slice(startIndex, endIndex);
+            
+            jobsToShow.forEach(job => {
                 const jobEl = document.createElement('div');
                 jobEl.className = 'job-card';
                 
@@ -1120,6 +1156,38 @@
                 jobEl.innerHTML = html;
                 jobsListContainer.appendChild(jobEl);
             });
+
+            // Add Pagination Controls
+            if (totalPages > 1) {
+                const paginationDiv = document.createElement('div');
+                paginationDiv.style.display = 'flex';
+                paginationDiv.style.justifyContent = 'space-between';
+                paginationDiv.style.alignItems = 'center';
+                paginationDiv.style.marginTop = '20px';
+                
+                const prevBtn = document.createElement('button');
+                prevBtn.textContent = '← Previous';
+                prevBtn.style.width = 'auto';
+                prevBtn.style.padding = '8px 15px';
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.onclick = () => { currentPage--; renderJobs(jobs); };
+                
+                const nextBtn = document.createElement('button');
+                nextBtn.textContent = 'Next →';
+                nextBtn.style.width = 'auto';
+                nextBtn.style.padding = '8px 15px';
+                nextBtn.disabled = currentPage === totalPages;
+                nextBtn.onclick = () => { currentPage++; renderJobs(jobs); };
+                
+                const pageInfo = document.createElement('span');
+                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                
+                paginationDiv.appendChild(prevBtn);
+                paginationDiv.appendChild(pageInfo);
+                paginationDiv.appendChild(nextBtn);
+                
+                jobsListContainer.appendChild(paginationDiv);
+            }
         }
     </script>
 </body>
