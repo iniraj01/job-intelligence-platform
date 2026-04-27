@@ -32,6 +32,12 @@ public class RealJobService {
         try {
             System.out.println("Jobs refreshed at: " + LocalDateTime.now());
             
+            java.io.File scriptFile = new java.io.File("job_fetcher.py");
+            if (!scriptFile.exists()) {
+                System.out.println("job_fetcher.py not found. Skipping job fetch.");
+                return;
+            }
+            
             ProcessBuilder pb = new ProcessBuilder("python3", "job_fetcher.py");
             pb.redirectError(ProcessBuilder.Redirect.INHERIT); // Sends stderr straight to console, prevents deadlock
             Process process = pb.start();

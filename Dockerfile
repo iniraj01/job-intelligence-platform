@@ -17,6 +17,10 @@ RUN apt-get update && apt-get install -y python3 python3-pip && rm -rf /var/lib/
 # Copy the built JAR from the previous stage
 COPY --from=build /app/target/*.jar app.jar
 
+# Copy python scripts
+COPY job_fetcher.py .
+COPY extract_skills.py .
+
 EXPOSE 8080
 
 # Run the application
