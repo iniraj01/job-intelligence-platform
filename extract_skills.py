@@ -95,7 +95,8 @@ def extract_information(text):
             "skills": list(extracted_skills),
             "experience_years": experience_years,
             "roles": list(extracted_roles),
-            "companies": list(extracted_companies)[:5] # Limit companies
+            "companies": list(extracted_companies)[:5], # Limit companies
+            "raw_text": text
         }
     except Exception as e:
         print(json.dumps({"error": str(e)}))

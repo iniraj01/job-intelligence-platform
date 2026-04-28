@@ -4,7 +4,7 @@ import sys
 
 def fetch_jsearch_jobs():
     url = "https://jsearch.p.rapidapi.com/search"
-    querystring = {"query": "Java Developer in India", "page": "1", "num_pages": "1"}
+    querystring = {"query": "Java Developer in India", "page": "1", "num_pages": "4"}
     
     headers = {
         "X-RapidAPI-Key": "57e320e8c7msh85519efa429050dp1f1065jsn4bcc6ae91dc7",
@@ -20,7 +20,6 @@ def fetch_jsearch_jobs():
         
         # Debug logs
         print("Status:", response.status_code, file=sys.stderr)
-        print("Response:", response.text, file=sys.stderr)
         
         if response.status_code != 200:
             raise Exception("API FAILED")
@@ -42,8 +41,8 @@ def fetch_jsearch_jobs():
                     "link": link
                 })
                 
-                # Return only first 10 jobs
-                if len(jobs) == 10:
+                # Limit to 40 jobs to prevent excessive memory/processing
+                if len(jobs) >= 40:
                     break
                     
     except Exception as e:

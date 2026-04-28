@@ -67,7 +67,7 @@ public class JobService {
             
             // Add slight dynamic variance (-3 to +7) to simulate hidden job requirements and ensure different scores
             int variance = (int) (Math.random() * 11) - 3;
-            double overallMatch = Math.min(100.0, Math.max(1.0, baseMatch + variance));
+            double overallMatch = Math.min(100.0, Math.max(0.0, baseMatch + variance));
             
             int finalScore = (int) Math.round(overallMatch);
             

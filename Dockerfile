@@ -19,9 +19,8 @@ RUN python3 -m spacy download en_core_web_sm
 # Copy the built JAR from the previous stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Copy python scripts
-COPY job_fetcher.py .
-COPY extract_skills.py .
+# Copy all files
+COPY . .
 
 EXPOSE 8080
 
