@@ -2,9 +2,9 @@ import requests
 import json
 import sys
 
-def fetch_jsearch_jobs():
+def fetch_jsearch_jobs(query):
     url = "https://jsearch.p.rapidapi.com/search"
-    querystring = {"query": "Java Developer in India", "page": "1", "num_pages": "4"}
+    querystring = {"query": query, "page": "1", "num_pages": "4"}
     
     headers = {
         "X-RapidAPI-Key": "57e320e8c7msh85519efa429050dp1f1065jsn4bcc6ae91dc7",
@@ -13,7 +13,7 @@ def fetch_jsearch_jobs():
     
     jobs = []
     
-    print("USING JSEARCH API", file=sys.stderr)
+    print(f"USING JSEARCH API WITH QUERY: {query}", file=sys.stderr)
     
     try:
         response = requests.get(url, headers=headers, params=querystring, timeout=15)
@@ -51,7 +51,10 @@ def fetch_jsearch_jobs():
     return jobs
 
 if __name__ == "__main__":
-    jobs = fetch_jsearch_jobs()
+    query = "Software Developer"
+    if len(sys.argv) > 1:
+        query = sys.argv[1]
+    jobs = fetch_jsearch_jobs(query)
     
     # Output clean JSON only
     print(json.dumps(jobs))

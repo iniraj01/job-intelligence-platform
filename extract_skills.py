@@ -6,10 +6,10 @@ from PyPDF2 import PdfReader
 
 # Predefined lists for simple matching
 SKILLS_DB = [
-    "java", "python", "sql", "spring boot", "react", "angular", "javascript",
+    "java", "python", "sql", "spring boot", "react", "angular", "javascript", "js",
     "c++", "c#", "html", "css", "docker", "kubernetes", "aws", "azure", "gcp",
     "git", "linux", "mongodb", "mysql", "postgresql", "node.js", "typescript",
-    "machine learning", "data science", "nlp"
+    "machine learning", "data science", "nlp", "cybersecurity", "iot", "web developer"
 ]
 
 COMMON_ROLES = [

@@ -28,8 +28,8 @@ public class JobService {
         List<String> userRoles = resumeData.getRoles() != null ? 
                 resumeData.getRoles().stream().map(String::toLowerCase).collect(Collectors.toList()) : new ArrayList<>();
 
-        // Use real jobs fetched by Python script
-        List<Job> jobsToMatch = realJobService.getRealJobs();
+        // Use dynamic real jobs fetched by Python script based on user skills
+        List<Job> jobsToMatch = realJobService.fetchDynamicJobs(userSkills);
 
         for (Job job : jobsToMatch) {
             // 1. Calculate skills match (50%)

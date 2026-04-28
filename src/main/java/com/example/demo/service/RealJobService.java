@@ -89,6 +89,69 @@ public class RealJobService {
         return new ArrayList<>(this.realJobs);
     }
     
+    public List<Job> fetchDynamicJobs(List<String> skills) {
+        if (skills == null || skills.isEmpty()) {
+            return getRealJobs();
+        }
+        
+        try {
+            java.io.File scriptFile = new java.io.File("job_fetcher.py");
+            if (!scriptFile.exists()) {
+                System.out.println("job_fetcher.py not found. Returning cached jobs.");
+                return getRealJobs();
+            }
+            
+            // Build query
+            String query = String.join(" OR ", skills);
+            // Limit query length to avoid overly long strings
+            if (query.length() > 50) {
+                query = query.substring(0, 50);
+            }
+            
+            ProcessBuilder pb = new ProcessBuilder("python3", "job_fetcher.py", query);
+            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+            Process process = pb.start();
+            
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line);
+                }
+            }
+            
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                ObjectMapper mapper = new ObjectMapper();
+                List<Map<String, String>> fetchedJobs = mapper.readValue(output.toString(), new TypeReference<List<Map<String, String>>>() {});
+                
+                List<Job> parsedJobs = new ArrayList<>();
+                for (Map<String, String> jobData : fetchedJobs) {
+                    Job job = new Job();
+                    job.setId(UUID.randomUUID().toString());
+                    job.setTitle(jobData.get("title"));
+                    job.setCompany(jobData.get("company"));
+                    job.setLink(jobData.get("link"));
+                    
+                    job.setRequiredSkills(autoTagSkills(job.getTitle()));
+                    job.setMinExperience(autoTagExperience(job.getTitle()));
+                    
+                    parsedJobs.add(job);
+                }
+                
+                if (!parsedJobs.isEmpty()) {
+                    return parsedJobs;
+                }
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error fetching dynamic jobs: " + e.getMessage());
+        }
+        
+        // Fallback to cached jobs
+        return getRealJobs();
+    }
+    
     private List<String> autoTagSkills(String title) {
         List<String> skills = new ArrayList<>();
         String t = title.toLowerCase();
@@ -106,21 +169,27 @@ public class RealJobService {
             skills.add("JavaScript");
         }
         if (t.contains("backend")) {
-            skills.add("Java");
+            skills.add("Node.js");
             skills.add("SQL");
+            skills.add("Java");
+            skills.add("Python");
         }
         if (t.contains("cloud") || t.contains("devops")) {
             skills.add("AWS");
             skills.add("Docker");
             skills.add("Linux");
         }
-        
-        // If no skills matched, add some generic ones
-        if (skills.isEmpty()) {
-            skills.add("Java");
-            skills.add("SQL");
+        if (t.contains("cybersecurity") || t.contains("security")) {
+            skills.add("Cybersecurity");
+            skills.add("Network Security");
+        }
+        if (t.contains("iot")) {
+            skills.add("IoT");
+            skills.add("C++");
+            skills.add("Python");
         }
         
+        // If no skills matched, just return empty list so it doesn't penalize or bias
         return skills;
     }
     
