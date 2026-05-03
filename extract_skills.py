@@ -3,6 +3,7 @@ import json
 import re
 import spacy
 from PyPDF2 import PdfReader
+from datetime import datetime
 
 # Predefined lists for simple matching
 SKILLS_DB = [
@@ -31,33 +32,77 @@ def extract_text_from_pdf(pdf_path):
         print(json.dumps({"error": str(e)}))
         sys.exit(1)
 
+def parse_date(date_str):
+    date_str = date_str.strip().lower()
+    if date_str in ['present', 'current', 'now', 'today']:
+        return datetime.now()
+    # Try different formats
+    for fmt in ('%b %Y', '%B %Y', '%m/%Y', '%m-%Y', '%Y', '%b-%Y'):
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            pass
+    # If it's just a year like '2020'
+    match = re.search(r'\b(20[0-2]\d|199\d)\b', date_str)
+    if match:
+        try:
+            return datetime.strptime(match.group(1), '%Y')
+        except ValueError:
+            pass
+    return None
+
 def extract_experience(text):
-    # Match patterns like "3 years of experience", "5+ years", "2 yrs", "Experience: 3 years"
+    # 1. Try direct values first
     patterns = [
-        r'(\d+)\+?\s*(?:years?|yrs?)(?:\s*of)?\s*experience', # 3 years of experience
-        r'experience(?:.*?)(\d+)\+?\s*(?:years?|yrs?)',        # Experience: 3 years
-        r'(\d+)\+?\s*(?:years?|yrs?)'                          # fallback: 3 years (if near experience, but let's just match any "X years")
+        r'(\d+(?:\.\d+)?)\+?\s*(?:years?|yrs?)(?:\s*of)?\s*experience',
+        r'experience(?:.*?)(\d+(?:\.\d+)?)\+?\s*(?:years?|yrs?)',
+        r'(?<!\d)(\d+(?:\.\d+)?)\+?\s*(?:years?|yrs?)(?!\s*old)'
     ]
-    
-    # First try strict patterns
-    for pattern in patterns[:2]:
+    direct_years = []
+    for pattern in patterns:
         matches = re.findall(pattern, text, re.IGNORECASE)
         if matches:
-            years = [int(m) for m in matches]
-            return max(years)
+            direct_years.extend([float(m) for m in matches if float(m) < 40])
+    
+    if direct_years:
+        return int(max(direct_years))
+
+    # 2. If no direct value, look for date ranges
+    month_regex = r'(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?|0?[1-9]|1[0-2])'
+    year_regex = r'(?:199\d|20[0-2]\d)'
+    date_part = rf'(?:{month_regex}[\s/-]+)?{year_regex}'
+    range_regex = rf'({date_part})\s*(?:-|–|to|until)\s*({date_part}|present|current|now|today)'
+    
+    ranges = re.findall(range_regex, text, re.IGNORECASE)
+    parsed_ranges = []
+    for start_str, end_str in ranges:
+        start_date = parse_date(start_str)
+        end_date = parse_date(end_str)
+        if start_date and end_date and start_date <= end_date:
+            parsed_ranges.append((start_date, end_date))
             
-    # If not found, try finding the word "experience" and looking for years nearby
-    text_lower = text.lower()
-    if "experience" in text_lower:
-        # Just find any digit followed by years
-        matches = re.findall(r'(\d+)\+?\s*(?:years?|yrs?)', text_lower)
-        if matches:
-            # Filter out ridiculously high numbers (like 2020 years)
-            years = [int(m) for m in matches if int(m) < 40]
-            if years:
-                return max(years)
+    if not parsed_ranges:
+        return 0
+        
+    # Merge overlapping ranges
+    parsed_ranges.sort(key=lambda x: x[0])
+    merged = []
+    for current in parsed_ranges:
+        if not merged:
+            merged.append(current)
+        else:
+            last = merged[-1]
+            if current[0] <= last[1]: # Overlap
+                merged[-1] = (last[0], max(last[1], current[1]))
+            else:
+                merged.append(current)
                 
-    return 0
+    # Calculate total duration in days
+    total_days = 0
+    for start, end in merged:
+        total_days += (end - start).days
+        
+    return int(max(1, total_days / 365))
 
 def extract_information(text):
     try:

@@ -62,16 +62,16 @@ public class JobService {
                 roleScore = userRoles.isEmpty() ? 50.0 : 0.0;
             }
 
-            // Overall match calculation
-            double baseMatch = (skillScore * 0.50) + (expScore * 0.30) + (roleScore * 0.20);
+            // Overall match calculation without arbitrary random variance
+            double calculatedMatch = (skillScore * 0.50) + (expScore * 0.30) + (roleScore * 0.20);
             
-            // Add slight dynamic variance (-3 to +7) to simulate hidden job requirements and ensure different scores
-            int variance = (int) (Math.random() * 11) - 3;
-            double overallMatch = Math.min(100.0, Math.max(0.0, baseMatch + variance));
+            // Add a minimum base score of 20 to avoid 0%, and scale the rest to 80
+            double overallMatch = 20.0 + (calculatedMatch * 0.80);
             
             int finalScore = (int) Math.round(overallMatch);
+            finalScore = Math.min(100, Math.max(0, finalScore));
             
-            if (finalScore > 15) { // Return decent matches
+            if (finalScore >= 20) { // Return decent matches
                 Job matchedJob = new Job(job.getId(), job.getTitle(), job.getCompany(), job.getRequiredSkills(), job.getMinExperience());
                 matchedJob.setLink(job.getLink()); // Ensure link is mapped
                 matchedJob.setMatchPercentage(finalScore);

@@ -101,12 +101,9 @@ public class RealJobService {
                 return getRealJobs();
             }
             
-            // Build query
-            String query = String.join(" OR ", skills);
-            // Limit query length to avoid overly long strings
-            if (query.length() > 50) {
-                query = query.substring(0, 50);
-            }
+            // Build query using up to 3 skills dynamically
+            List<String> querySkills = skills.size() > 3 ? skills.subList(0, 3) : skills;
+            String query = String.join(" OR ", querySkills);
             
             ProcessBuilder pb = new ProcessBuilder("python3", "job_fetcher.py", query);
             pb.redirectError(ProcessBuilder.Redirect.INHERIT);
@@ -171,8 +168,6 @@ public class RealJobService {
         if (t.contains("backend")) {
             skills.add("Node.js");
             skills.add("SQL");
-            skills.add("Java");
-            skills.add("Python");
         }
         if (t.contains("cloud") || t.contains("devops")) {
             skills.add("AWS");
